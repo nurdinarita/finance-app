@@ -16,9 +16,12 @@ class DashboardController extends Controller
     public function index()
     {
         $accounts = Account::orderBy('name', 'asc')->get();
-        $accountsUsed = Account::where('show_in_balance', true)->get();
-        $accountBalance = $accountsUsed->sum('balance');
+        $usedAccounts = Account::where('show_in_balance', true)->get();
+        $accountBalance = $usedAccounts->sum('balance');
         $totalBalance = $accountBalance;
+
+        // Save Accounts
+        $savedAccounts = Account::where('show_in_balance', false)->get();
 
         $income = Transaction::where('type', 'income')->get();
         $expense = Transaction::where('type', 'expense')->get();
@@ -27,6 +30,8 @@ class DashboardController extends Controller
         $totalExpense = $expense->sum('amount');
 
 
+        // Labels for the chart
+        // Total pengeluaran berdasarkan hari
         $labels = ['1', '5', '10', '15', '20', '25', '30'];
         $incomeData = [];
         $expenseData = [];
@@ -44,10 +49,25 @@ class DashboardController extends Controller
                 ->sum('amount');
         }
 
+        // Label for the chart
+        // Total pengeluaran berdasarkan kategori
+        $expenseByCategory = Transaction::selectRaw('categories.name as category_name, SUM(amount) as total')
+            ->join('categories', 'transactions.category_id', '=', 'categories.id')
+            ->where('transactions.type', 'expense')
+            ->groupBy('categories.name')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        $expenseCategoryLabels = $expenseByCategory->pluck('category_name');
+        $expenseCategoryData = $expenseByCategory->pluck('total');
+
+
         return view('dashboard.dashboard', [
             'title' => 'Dashboard',
             'active' => 'dashboard',
             'categories' => Category::orderBy('name', 'asc')->get(),
+            'usedAccounts' => $usedAccounts,
+            'savedAccounts' => $savedAccounts,
             'accounts' => $accounts,
             'income' => $income,
             'expense' => $expense,
@@ -57,6 +77,10 @@ class DashboardController extends Controller
             'chartLabels' => $labels,
             'chartIncomeData' => $incomeData,
             'chartExpenseData' => $expenseData,
+            
+            'expenseCategoryLabels' => $expenseCategoryLabels,
+            'expenseCategoryData' => $expenseCategoryData,
+
 
         ]);
     }

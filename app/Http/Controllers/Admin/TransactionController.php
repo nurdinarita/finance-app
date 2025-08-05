@@ -20,52 +20,96 @@ class TransactionController extends Controller
 
     public function store(Request $request)
     {
-        // Format amount
+        // Format amount (menghapus titik, mengganti koma jadi titik)
         $request->merge([
-            'amount' => str_replace(['.', ','], ['', '.'], $request->amount)
+            'amount' => str_replace(['.', ','], ['', '.'], $request->amount),
+            'category' => $request->transactionType === 'transfer' ? 'Pemindahan Dana' : $request->category,
         ]);
 
         // Validasi input
         $request->validate([
             'account' => 'required|exists:accounts,id',
-            'transactionType' => 'required|in:income,expense',
-            'amount' => 'required|numeric|min:0',
-            'category' => 'required|string|max:255', // string karena bisa input baru
+            'transactionType' => 'required|in:income,expense,transfer',
+            'amount' => 'required|numeric|min:0.01',
+            'category' => 'required|string|max:255',
             'transactionDate' => 'required|date_format:Y-m-d\TH:i',
             'note' => 'nullable|string|max:500',
+            'account_to' => 'nullable|required_if:transactionType,transfer|exists:accounts,id|different:account',
         ]);
 
-        // Cek apakah ada rkeningan akun
-        $account = Account::find($request->account);
-        if($request->transactionType === 'expense' && $account->balance < $request->amount) {
-            return redirect()->back()->withErrors(['amount' => 'Saldo tidak cukup untuk transaksi ini']);
+        $amount = floatval($request->amount);
+        $transactionDate = $request->transactionDate;
+
+        // Ambil akun asal
+        $account = Account::findOrFail($request->account);
+
+        // Cek saldo cukup untuk expense dan transfer
+        if (in_array($request->transactionType, ['expense', 'transfer']) && $account->balance < $amount) {
+            return redirect()->back()->withErrors(['amount' => 'Saldo tidak cukup untuk transaksi ini'])->withInput();
         }
 
-        // Cari kategori, kalau tidak ada, buat baru
+        // Ambil/buat kategori
         $category = Category::firstOrCreate(
             ['name' => $request->category],
             ['max_limit' => null]
         );
 
+        // === TRANSAKSI TRANSFER ===
+        if ($request->transactionType === 'transfer') {
+            $targetAccount = Account::findOrFail($request->account_to);
+
+            // Kurangi saldo akun asal
+            $account->balance = max(0, $account->balance - $amount);
+            $account->save();
+
+            // Tambah saldo akun tujuan
+            $targetAccount->balance += $amount;
+            $targetAccount->save();
+
+            // Simpan transaksi akun asal
+            Transaction::create([
+                'type' => 'transfer',
+                'amount' => $amount,
+                'account_id' => $account->id,
+                'category_id' => $category->id,
+                'transaction_date' => $transactionDate,
+                'note' => $request->note ?? 'Transfer ke: ' . $targetAccount->name,
+            ]);
+
+            // Simpan transaksi akun tujuan (income)
+            Transaction::create([
+                'type' => 'transfer',
+                'amount' => $amount,
+                'account_id' => $targetAccount->id,
+                'category_id' => $category->id,
+                'transaction_date' => $transactionDate,
+                'note' => 'Transfer dari: ' . $account->name,
+            ]);
+
+            return redirect()->back()->with('success', 'Transfer berhasil disimpan.');
+        }
+
+        // === TRANSAKSI INCOME / EXPENSE ===
         // Simpan transaksi
-        $Transaction = Transaction::create([
+        Transaction::create([
             'type' => $request->transactionType,
-            'amount' => $request->amount,
-            'account_id' => $request->account,
+            'amount' => $amount,
+            'account_id' => $account->id,
             'category_id' => $category->id,
-            'transaction_date' => $request->transactionDate,
+            'transaction_date' => $transactionDate,
             'note' => $request->note,
         ]);
 
-        // Update saldo akun
+        // Update saldo
         if ($request->transactionType === 'income') {
-            $account->balance += $request->amount;
+            $account->balance += $amount;
         } else {
-            $account->balance -= $request->amount;
+            $account->balance = max(0, $account->balance - $amount);
         }
         $account->save();
 
-        return redirect()->back()->with('success', 'Transaksi berhasil disimpan');
+        return redirect()->back()->with('success', 'Transaksi berhasil disimpan.');
     }
+
 
 }

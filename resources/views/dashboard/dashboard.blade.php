@@ -73,6 +73,19 @@
                         <i class="bi bi-wallet2 fs-1 text-primary"></i>
                     </div>
                 </div>
+                <div class="row">
+                    {{-- Rekening dalam 3 kolom --}}
+                    <div class="row g-2 mt-2">
+                        @foreach($usedAccounts as $account)
+                            <div class="col-4">
+                                <div class="p-2 rounded border bg-light h-100">
+                                    <div class="text-muted small mb-1">{{ $account->name }}</div>
+                                    <div class="text-dark fw-semibold small">Rp {{ number_format($account->balance, 0, ',', '.') }}</div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -139,22 +152,12 @@
                 </div>
                 <hr>
                 <div class="mt-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Belanja</span>
-                        <span class="fw-bold">Rp2,340,000</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Makanan</span>
-                        <span class="fw-bold">Rp1,560,000</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Transportasi</span>
-                        <span class="fw-bold">Rp980,000</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Hiburan</span>
-                        <span class="fw-bold">Rp870,000</span>
-                    </div>
+                    @foreach($expenseCategoryLabels as $index => $label)
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ $label }}</span>
+                            <span class="fw-bold">Rp{{ number_format($expenseCategoryData[$index], 0, ',', '.') }}</span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>

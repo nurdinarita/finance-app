@@ -8,10 +8,10 @@ class Account extends Model
 {
     protected $guarded = [];
 
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
-    }
+    // public function transactions()
+    // {
+    //     return $this->hasMany(Transaction::class);
+    // }
 
 
     // public function scopeVisible($query)

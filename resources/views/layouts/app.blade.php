@@ -277,68 +277,124 @@
     <div class="modal fade" id="addTransactionModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="{{ route('transactions.store') }}" method="POST">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Tambah Transaksi</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label">Rekening</label>
-                                <select name="account" class="form-select" required>
-                                    <option value="">Pilih Rekening</option>
-                                    @foreach($accounts as $account)
-                                        <option value="{{ $account->id }}">{{ $account->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Jenis Transaksi</label>
-                                <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="transactionType" id="income" value="income" autocomplete="off" required>
-                                    <label class="btn btn-outline-success" for="income">Pendapatan</label>
-                                    
-                                    <input type="radio" class="btn-check" name="transactionType" id="expense" value="expense" autocomplete="off" required>
-                                    <label class="btn btn-outline-danger" for="expense">Pengeluaran</label>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Jumlah</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
-                                    <input type="text" name="amount" class="form-control" placeholder="0" id="amountInput" autocomplete="off" required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Kategori</label>
-                                <select id="kategoriSelect" class="form-select" placeholder="Pilih kategori..." name="category" required>
-                                    <option value="">Pilih kategori</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->name }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+            <form action="{{ route('transactions.store') }}" method="POST" id="transactionForm">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Transaksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Jenis Transaksi -->
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Transaksi</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="transactionType" id="income" value="income" autocomplete="off" required>
+                            <label class="btn btn-outline-success" for="income">Pendapatan</label>
 
+                            <input type="radio" class="btn-check" name="transactionType" id="expense" value="expense" autocomplete="off" required>
+                            <label class="btn btn-outline-danger" for="expense">Pengeluaran</label>
 
-                            <div class="mb-3">
-                                <label class="form-label">Tanggal</label>
-                                <input type="datetime-local" class="form-control" name="transactionDate" value="{{ now()->format('Y-m-d\TH:i') }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Catatan</label>
-                                <textarea class="form-control" rows="2" placeholder="Tambahkan catatan (opsional)" name="note"></textarea>
-                            </div>
+                            <input type="radio" class="btn-check" name="transactionType" id="transfer" value="transfer" autocomplete="off" required>
+                            <label class="btn btn-outline-primary" for="transfer">Pindah Dana</label>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button class="btn btn-primary" type="submit">Simpan</button>
+
+                    <!-- Rekening -->
+                    <div class="mb-3" id="accountFromGroup">
+                        <label class="form-label" id="accountFromLabel">Rekening</label>
+                        <select name="account" id="accountFrom" class="form-select" required>
+                            <option value="">Pilih Rekening</option>
+                            @foreach($accounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                </form>
-              
+
+                    <!-- Rekening Tujuan (hanya untuk transfer) -->
+                    <div class="mb-3 d-none" id="accountToGroup">
+                        <label class="form-label">Ke Rekening</label>
+                        <select name="account_to" class="form-select">
+                            <option value="">Pilih Rekening Tujuan</option>
+                            @foreach($accounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Jumlah -->
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="text" name="amount" class="form-control" placeholder="0" id="amountInput" autocomplete="off" required>
+                        </div>
+                    </div>
+
+                    <!-- Kategori (kecuali untuk transfer) -->
+                    <div class="mb-3" id="categoryGroup">
+                        <label class="form-label">Kategori</label>
+                        <select id="kategoriSelect" class="form-select" name="category">
+                            <option value="">Pilih kategori</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->name }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Tanggal -->
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal</label>
+                        <input type="datetime-local" class="form-control" name="transactionDate" value="{{ now()->format('Y-m-d\TH:i') }}" required>
+                    </div>
+
+                    <!-- Catatan -->
+                    <div class="mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea class="form-control" rows="2" placeholder="Tambahkan catatan (opsional)" name="note"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button class="btn btn-primary" type="submit">Simpan</button>
+                </div>
+            </form>
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const income = document.getElementById('income');
+            const expense = document.getElementById('expense');
+            const transfer = document.getElementById('transfer');
+
+            const accountFromLabel = document.getElementById('accountFromLabel');
+            const accountFrom = document.getElementById('accountFrom');
+            const accountToGroup = document.getElementById('accountToGroup');
+            const categoryGroup = document.getElementById('categoryGroup');
+
+            function updateForm() {
+                if (transfer.checked) {
+                    accountToGroup.classList.remove('d-none');
+                    accountFromLabel.innerText = 'Dari Rekening';
+                    accountFrom.setAttribute('name', 'account');
+                    categoryGroup.classList.add('d-none');
+                } else {
+                    accountToGroup.classList.add('d-none');
+                    accountFromLabel.innerText = 'Rekening';
+                    accountFrom.setAttribute('name', 'account');
+                    categoryGroup.classList.remove('d-none');
+                }
+            }
+
+            [income, expense, transfer].forEach(el => {
+                el.addEventListener('change', updateForm);
+            });
+        });
+    </script>
+
 
     <script>
         new TomSelect("#kategoriSelect", {
@@ -417,9 +473,9 @@
                 const expenseChart = new Chart(expenseCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Belanja', 'Makanan', 'Transportasi', 'Hiburan', 'Lainnya'],
+                        labels: {!! json_encode($expenseCategoryLabels) !!},
                         datasets: [{
-                            data: [2340000, 1560000, 980000, 870000, 500000],
+                            data: {!! json_encode($expenseCategoryData) !!},
                             backgroundColor: ['#4e73df', '#1cc88a', '#ffc107', '#e74a3b', '#858796'],
                             hoverBackgroundColor: ['#2e59d9', '#17a673', '#dda20a', '#be2617', '#666872'],
                             hoverBorderColor: "rgba(234, 236, 244, 1)",

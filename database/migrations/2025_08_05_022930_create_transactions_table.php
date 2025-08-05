@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['income', 'expense']);
+            $table->enum('type', ['income', 'expense', 'transfer']);
             $table->decimal('amount', 15, 2);
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null'); // WAJIB
             $table->foreignId('account_id')->constrained('accounts')->onDelete('restrict'); // WAJIB
