@@ -17,6 +17,7 @@ class DashboardController extends Controller
     {
         $accounts = Account::where('show_in_balance', true)->get();
         $accountBalance = $accounts->sum('balance');
+        $totalBalance = $accountBalance;
 
         $income = Transaction::where('type', 'income')->get();
         $expense = Transaction::where('type', 'expense')->get();
@@ -24,7 +25,6 @@ class DashboardController extends Controller
         $totalIncome = $income->sum('amount');
         $totalExpense = $expense->sum('amount');
 
-        $totalBalance = $accountBalance + $totalIncome - $totalExpense;
 
         $labels = ['1', '5', '10', '15', '20', '25', '30'];
         $incomeData = [];
