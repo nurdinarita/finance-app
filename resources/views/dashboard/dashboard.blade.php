@@ -96,13 +96,24 @@
                     <div class="col-8">
                         <h5 class="text-uppercase text-muted small mb-2">Pendapatan</h5>
                         <h3 class="mb-0">{{ 'Rp ' . number_format($totalIncome, 0, ',', '.') }}</h3>
-                        <span class="text-success small">
-                            <i class="bi bi-arrow-up"></i> 12.5% dari bulan lalu
-                        </span>
+                      
                     </div>
                     <div class="col-4 text-end">
                         <i class="bi bi-arrow-down-circle fs-1 text-success"></i>
                     </div>
+                </div>
+                <div class="row mt-2">
+                {{-- Tampilkan 3 transaksi pendapatan terakhir --}}
+                @foreach (collect($lastTransactions)->where('type', 'income')->take(3) as $transaction)
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">{{ $transaction->category->name }}</span>
+                            <span class="text-success fw-bold">
+                                + Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
                 </div>
             </div>
         </div>
@@ -114,13 +125,23 @@
                     <div class="col-8">
                         <h5 class="text-uppercase text-muted small mb-2">Pengeluaran</h5>
                         <h3 class="mb-0">{{ 'Rp ' . number_format($totalExpense, 0, ',', '.') }}</h3>
-                        <span class="text-danger small">
-                            <i class="bi bi-arrow-up"></i> 8.3% dari bulan lalu
-                        </span>
                     </div>
                     <div class="col-4 text-end">
                         <i class="bi bi-arrow-up-circle fs-1 text-danger"></i>
                     </div>
+                </div>
+                {{-- Tampilkan 3 transaksi Pengeluaran terakhir --}}
+                <div class="row mt-2">
+                @foreach (collect($lastTransactions)->where('type', 'expense')->take(3) as $transaction)
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">{{ $transaction->category->name }}</span>
+                            <span class="text-danger fw-bold">
+                                + Rp {{ number_format($transaction->amount, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
                 </div>
             </div>
         </div>
@@ -171,53 +192,19 @@
         <a href="#" class="btn btn-sm btn-primary">Lihat Semua</a>
     </div>
     <div class="card-body">
-        <div class="transaction-item income-item">
+        @foreach($lastTransactions as $transaction)
+        <div class="transaction-item {{ $transaction->type === 'income' ? 'income-item' : ($transaction->type === 'transfer' ? 'transfer-item' : 'expense-item') }}">
             <div class="d-flex justify-content-between">
                 <div>
-                    <h6 class="mb-1">Gaji Bulanan</h6>
-                    <small class="text-muted">05 Juni 2023</small>
+                    <h6 class="mb-1 fw-semibold">{{ $transaction->category->name }}</h6>
+                    <small class="text-muted">{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y, H:i') }}</small>
                 </div>
-                <div class="text-success fw-bold">
-                    + Rp5,500,000
+                <div class="{{ $transaction->type === 'income' ? 'text-success' : ($transaction->type === 'transfer' ? 'text-primary' : 'text-danger') }} fw-bold">
+                    {{ $transaction->type === 'income' ? '+' : ($transaction->type === 'transfer' ? '↔' : '-') }} {{ 'Rp ' . number_format($transaction->amount, 0, ',', '.') }}
                 </div>
             </div>
         </div>
-        
-        <div class="transaction-item expense-item">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h6 class="mb-1">Belanja Bulanan</h6>
-                    <small class="text-muted">03 Juni 2023</small>
-                </div>
-                <div class="text-danger fw-bold">
-                    - Rp1,250,000
-                </div>
-            </div>
-        </div>
-        
-        <div class="transaction-item expense-item">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h6 class="mb-1">Makan di Restoran</h6>
-                    <small class="text-muted">01 Juni 2023</small>
-                </div>
-                <div class="text-danger fw-bold">
-                    - Rp350,000
-                </div>
-            </div>
-        </div>
-        
-        <div class="transaction-item income-item">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <h6 class="mb-1">Freelance Project</h6>
-                    <small class="text-muted">28 Mei 2023</small>
-                </div>
-                <div class="text-success fw-bold">
-                    + Rp2,700,000
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>
 @endsection

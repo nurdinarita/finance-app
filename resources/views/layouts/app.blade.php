@@ -205,13 +205,17 @@
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav py-2 px-3 d-md-none">
         <div class="w-100 d-flex justify-content-between align-items-center">
-            <a href="#" class="text-center text-dark text-decoration-none active">
+            <a href="{{ route('dashboard') }}" class="text-center text-dark text-decoration-none {{ $active === 'dashboard' ? 'active' : '' }}">
                 <i class="bi bi-house-door fs-5 d-block"></i>
                 <span class="small">Dashboard</span>
             </a>
             <a href="#" class="text-center text-dark text-decoration-none">
                 <i class="bi bi-wallet2 fs-5 d-block"></i>
                 <span class="small">Transaksi</span>
+            </a>
+            <a href="{{ route('accounts') }}" class="text-center text-dark text-decoration-none {{ $active === 'accounts' ? 'active' : '' }}">
+                <i class="bi bi-bank fs-5 d-block"></i>
+                <span class="small">Rekening</span>
             </a>
             <a href="#" class="text-center text-dark text-decoration-none">
                 <i class="bi bi-pie-chart fs-5 d-block"></i>
@@ -225,7 +229,7 @@
     </div>
     
     <!-- Main Content -->
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-4 mb-5 mb-lg-0">
         <div class="row">
             <!-- Desktop Sidebar -->
             <div class="col-lg-2 d-none d-lg-block sidebar">
@@ -260,7 +264,7 @@
             </div>
             
             <!-- Main Content Area -->
-            <div class="col-lg-10 col-12">
+            <div class="col-lg-10 col-12 mb-5 mb-lg-0">
 
                 @yield('main-content')
 

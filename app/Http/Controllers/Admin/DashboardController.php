@@ -29,6 +29,8 @@ class DashboardController extends Controller
         $totalIncome = $income->sum('amount');
         $totalExpense = $expense->sum('amount');
 
+        $lastTransactions = Transaction::where('type', '!=', 'transfer')->orderBy('transaction_date', 'desc')->get();
+
 
         // Labels for the chart
         // Total pengeluaran berdasarkan hari
@@ -77,9 +79,10 @@ class DashboardController extends Controller
             'chartLabels' => $labels,
             'chartIncomeData' => $incomeData,
             'chartExpenseData' => $expenseData,
-            
+
             'expenseCategoryLabels' => $expenseCategoryLabels,
             'expenseCategoryData' => $expenseCategoryData,
+            'lastTransactions' => $lastTransactions,
 
 
         ]);
