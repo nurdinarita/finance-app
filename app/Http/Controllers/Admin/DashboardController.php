@@ -15,8 +15,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $accounts = Account::where('show_in_balance', true)->get();
-        $accountBalance = $accounts->sum('balance');
+        $accounts = Account::orderBy('name', 'asc')->get();
+        $accountsUsed = Account::where('show_in_balance', true)->get();
+        $accountBalance = $accountsUsed->sum('balance');
         $totalBalance = $accountBalance;
 
         $income = Transaction::where('type', 'income')->get();
