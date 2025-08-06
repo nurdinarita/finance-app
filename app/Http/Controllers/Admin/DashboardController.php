@@ -23,13 +23,16 @@ class DashboardController extends Controller
         // Save Accounts
         $savedAccounts = Account::where('show_in_balance', false)->get();
 
-        $income = Transaction::where('type', 'income')->get();
-        $expense = Transaction::where('type', 'expense')->get();
+        $income = Transaction::where('type', 'income')->whereMonth('transaction_date', date('m'))->whereYear('transaction_date', date('Y'))->get();
+        $expense = Transaction::where('type', 'expense')->whereMonth('transaction_date', date('m'))->whereYear('transaction_date', date('Y'))->get();
 
         $totalIncome = $income->sum('amount');
         $totalExpense = $expense->sum('amount');
 
-        $lastTransactions = Transaction::where('type', '!=', 'transfer')->orderBy('transaction_date', 'desc')->get();
+        $lastTransactions = Transaction::where('type', '!=', 'transfer')
+            ->whereMonth('transaction_date', date('m'))
+            ->whereYear('transaction_date', date('Y'))
+            ->orderBy('transaction_date', 'desc')->get();
 
 
         // Labels for the chart
@@ -41,11 +44,15 @@ class DashboardController extends Controller
         foreach ($labels as $day) {
             $nextDay = $day + 4;
             $incomeData[] = Transaction::where('type', 'income')
+                ->whereMonth('transaction_date', date('m'))
+                ->whereYear('transaction_date', date('Y'))
                 ->whereDay('transaction_date', '>=', $day)
                 ->whereDay('transaction_date', '<=', $nextDay)
                 ->sum('amount');
 
             $expenseData[] = Transaction::where('type', 'expense')
+                ->whereMonth('transaction_date', date('m'))
+                ->whereYear('transaction_date', date('Y'))
                 ->whereDay('transaction_date', '>=', $day)
                 ->whereDay('transaction_date', '<=', $nextDay)
                 ->sum('amount');
@@ -56,6 +63,8 @@ class DashboardController extends Controller
         $expenseByCategory = Transaction::selectRaw('categories.name as category_name, SUM(amount) as total')
             ->join('categories', 'transactions.category_id', '=', 'categories.id')
             ->where('transactions.type', 'expense')
+            ->whereMonth('transactions.transaction_date', date('m'))
+            ->whereYear('transactions.transaction_date', date('Y'))
             ->groupBy('categories.name')
             ->orderBy('total', 'desc')
             ->get();

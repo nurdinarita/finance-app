@@ -196,8 +196,9 @@
         <div class="transaction-item {{ $transaction->type === 'income' ? 'income-item' : ($transaction->type === 'transfer' ? 'transfer-item' : 'expense-item') }}">
             <div class="d-flex justify-content-between">
                 <div>
-                    <h6 class="mb-1 fw-semibold">{{ $transaction->category->name }}</h6>
+                    <h6 class="mb-1 fw-semibold">{{ $transaction->account->name }} - {{ $transaction->category->name }}</h6>
                     <small class="text-muted">{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y, H:i') }}</small>
+                    <small class="text-muted d-block">{{ $transaction->note }}</small>
                 </div>
                 <div class="{{ $transaction->type === 'income' ? 'text-success' : ($transaction->type === 'transfer' ? 'text-primary' : 'text-danger') }} fw-bold">
                     {{ $transaction->type === 'income' ? '+' : ($transaction->type === 'transfer' ? '↔' : '-') }} {{ 'Rp ' . number_format($transaction->amount, 0, ',', '.') }}

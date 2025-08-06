@@ -49,10 +49,16 @@ class TransactionController extends Controller
         }
 
         // Ambil/buat kategori
-        $category = Category::firstOrCreate(
-            ['name' => $request->category],
-            ['max_limit' => null]
-        );
+        $categoryName = strtolower($request->category);
+
+        $category = Category::whereRaw('LOWER(name) = ?', [$categoryName])->first();
+
+        if (!$category) {
+            $category = Category::create([
+                'name' => $request->category,
+                'max_limit' => null
+            ]);
+        }
 
         // === TRANSAKSI TRANSFER ===
         if ($request->transactionType === 'transfer') {
