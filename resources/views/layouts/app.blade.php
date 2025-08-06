@@ -186,10 +186,13 @@
             <div class="collapse navbar-collapse" id="mobileNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i> Dashboard</a>
+                        <a class="nav-link {{ $active === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard') }}"><i class="bi bi-house-door me-1"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-wallet2 me-1"></i> Transaksi</a>
+                        <a class="nav-link {{ $active === 'transactions' ? 'active' : '' }}" href="{{ route('transactions') }}"><i class="bi bi-wallet2 me-1"></i> Transaksi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ $active === 'accounts' ? 'active' : '' }}" href="{{ route('accounts') }}"><i class="bi bi-bank me-1"></i> Rekening</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#"><i class="bi bi-pie-chart me-1"></i> Laporan</a>
@@ -209,7 +212,7 @@
                 <i class="bi bi-house-door fs-5 d-block"></i>
                 <span class="small">Dashboard</span>
             </a>
-            <a href="#" class="text-center text-dark text-decoration-none">
+            <a href="{{ route('transactions') }}" class="text-center text-dark text-decoration-none {{ $active === 'transactions' ? 'active' : '' }}">
                 <i class="bi bi-wallet2 fs-5 d-block"></i>
                 <span class="small">Transaksi</span>
             </a>
@@ -246,7 +249,7 @@
                         <a class="nav-link {{ $active === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard') }}"><i class="bi bi-grid me-2"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-wallet2 me-2"></i> Transaksi</a>
+                        <a class="nav-link {{ $active === 'transactions' ? 'active' : '' }}" href="{{ route('transactions') }}"><i class="bi bi-wallet2 me-2"></i> Transaksi</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ $active === 'accounts' ? 'active' : '' }}" href="{{ route('accounts') }}"><i class="bi bi-bank me-2"></i> Rekening</a>

@@ -189,7 +189,7 @@
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Transaksi Terakhir</h6>
-        <a href="#" class="btn btn-sm btn-primary">Lihat Semua</a>
+        <a href="{{ route('transactions') }}" class="btn btn-sm btn-primary">Lihat Semua</a>
     </div>
     <div class="card-body">
         @foreach($lastTransactions as $transaction)
@@ -197,7 +197,14 @@
             <div class="d-flex justify-content-between">
                 <div>
                     <h6 class="mb-1 fw-semibold">{{ $transaction->account->name }} - {{ $transaction->category->name }}</h6>
-                    <small class="text-muted">{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y, H:i') }}</small>
+                    <small class="text-muted">
+                        @if (\Carbon\Carbon::parse($transaction->transaction_date)->isToday())
+                            Hari ini, {{ \Carbon\Carbon::parse($transaction->transaction_date)->format('H:i') }}
+                        @else
+                            {{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y, H:i') }}
+                        @endif
+                    </small>
+
                     <small class="text-muted d-block">{{ $transaction->note }}</small>
                 </div>
                 <div class="{{ $transaction->type === 'income' ? 'text-success' : ($transaction->type === 'transfer' ? 'text-primary' : 'text-danger') }} fw-bold">

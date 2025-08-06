@@ -15,7 +15,27 @@ class TransactionController extends Controller
 {
     public function index()
     {
-        return view('admin.transactions.index');
+        $transactions = Transaction::with(['account', 'category'])
+            ->when(request('search'), function ($query) {
+                $query->where('note', 'like', '%' . request('search') . '%')
+                    ->orWhereHas('account', fn($q) => $q->where('name', 'like', '%' . request('search') . '%'));
+            })
+            ->when(request('type'), fn($q) => $q->where('type', request('type')))
+            ->when(request('category_id'), fn($q) => $q->where('category_id', request('category_id')))
+            ->orderBy('transaction_date', 'desc')
+            ->paginate(10);
+
+        $categories = Category::orderBy('name', 'asc')->get();
+        $accounts = Account::where('show_in_balance', true)->orderBy('name', 'asc')->get();
+
+        return view('transactions.transactions', [
+            'title' => 'Transactions',
+            'active' => 'transactions',
+            'transactions' => $transactions,
+            'categories' => $categories,
+            'accounts' => $accounts,
+        ]);
+
     }
 
     public function store(Request $request)
